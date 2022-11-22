@@ -1,5 +1,7 @@
 .idea/
 *.download/
+*.splits/
+*.waves/
 *.csv
 *.log
 *.mp4
