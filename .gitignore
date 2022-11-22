@@ -1,1 +1,7 @@
 .idea/
+*.download/
+*.csv
+*.log
+*.mp4
+*.wav
+__pycache__
