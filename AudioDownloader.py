@@ -21,7 +21,8 @@ def convert_to_wav(filename: str, save_dir: str) -> [str, None]:
     :param save_dir: save to which folder
     :return: converted file name
     """
-    name = os.path.basename(filename)
+    basename = os.path.basename(filename)
+    name, _ = os.path.splitext(basename)
     output_name = os.path.join(save_dir, f"{name}.wav")
     ret = subprocess.run([
         "ffmpeg",
@@ -30,11 +31,10 @@ def convert_to_wav(filename: str, save_dir: str) -> [str, None]:
     ]).returncode
     if ret != 0:
         return None
-    else:
-        return output_name
+    return output_name
 
 
-def splits_audio(filename, from_sec: int, end_sec: int, save_dir: str, call_back) -> [str, None]:
+def splits_audio(filename, start_sec: int, end_sec: int, save_dir: str, call_back) -> [str, None]:
     """
     After downloading, split audio file.
     :param filename:
@@ -44,8 +44,21 @@ def splits_audio(filename, from_sec: int, end_sec: int, save_dir: str, call_back
     :param save_dir: save to which folder
     :return: split file name.
     """
-    print(filename)
-    return filename
+    basename = os.path.basename(filename)
+    name, _ = os.path.splitext(basename)
+    output_name = os.path.join(save_dir, f"{name}.wav")
+    # ffmpeg -ss 60 -i input-audio.aac -t 15 -c copy output.aac
+    ret = subprocess.run([
+        "ffmpeg",
+        "-ss", str(start_sec),
+        "-i", filename,
+        # "-acodec copy",
+        "-t", str(end_sec - start_sec),
+        output_name
+    ]).returncode
+    if ret != 0:
+        return None
+    return output_name
 
 
 def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=False) -> [str, None]:
@@ -111,10 +124,16 @@ def main():
 
     split_audio_positive_label = open(f"{CSV_FILE_NAME}.split-pos.csv", "w")
     with open(CSV_FILE_NAME, "r") as csv_fin:
-        reader = csv.DictReader(csv_fin)
+        reader = csv.reader(csv_fin)
         i = 0
         logging.info(f"Download timer :{TIMER}")
-        for raw in reader:
+        for line in reader:
+            raw = {
+                "YTID": line[0],
+                "start_sec": int(float(line[1].replace(" ", ""))),
+                "end_sec": int(float(line[2].replace(" ", ""))),
+                "positive_labels": line[3:]
+            }
             url = f"{YTB_URL_FORMAT.format(YTID=(ytid := raw['YTID']))}"
             moved_name = download_video(url, ytid, dl_video_save_dir, DOWN_HIGHEST_QUALITY)
             wave_name = None
@@ -127,15 +146,15 @@ def main():
             if wave_name is None:
                 logging.fatal(f"Could not convert file<{wave_name}> to wav format.")
             else:
-                start = 0  # raw["start_seconds"]
-                end = 0  # raw["end_seconds"]
+                start = raw["start_sec"]
+                end = raw["end_sec"]
                 logging.info(f"Splitting file<{wave_name}>, from {start} to {end}")
                 split_name = splits_audio(wave_name, start, end, splits_dir, None)
 
             if split_name is None:
                 logging.fatal(f"Can not split file<{wave_name}> to {start}s to {end}s")
             else:
-                split_audio_positive_label.write(f"{split_name}, {None}\n")
+                split_audio_positive_label.write(f'''{split_name}, {'{}'.format(",".join(raw["positive_labels"]))}\n''')
 
             if 0 < TIMER == i:
                 break
