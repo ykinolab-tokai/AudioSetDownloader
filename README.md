@@ -27,16 +27,20 @@ This program/code in published by MIT License.
 
     This defines the constants needed during the download process.
 
-    |        Symbols         |                            Means                             |
-    | :--------------------: | :----------------------------------------------------------: |
-    |    `CSV_FILE_NAME`     |     The path of the csv file that needs to be downloaded     |
-    |    `YTB_URL_FORMAT`    | Youtube link rules, where YTID represents the id of the video |
-    |        `TIMER`         | The maximum number of downloaded files. When timer=3, 4 files will be downloaded. |
-    | `DOWN_HIGHEST_QUALITY` | Youtube videos have different specifications, whether to download the highest quality specifications. |
+    |        Symbols         |                            Means                             | Type   |
+    | :--------------------: | :----------------------------------------------------------: | ------ |
+    |    `CSV_FILE_NAMES`    |    The paths of the csv file that needs to be downloaded     | `list` |
+    |    `YTB_URL_FORMAT`    | Youtube link rules, where YTID represents the id of the video | `str`  |
+    |        `TIMER`         | The maximum number of downloaded files. When timer=3, 4 files will be downloaded. | `int`  |
+    | `DOWN_HIGHEST_QUALITY` | Youtube videos have different specifications, whether to download the highest quality specifications. | `bool` |
 
 4. Run `AudioDownloader.py`
 
     the log will be output to the command line and the file corresponding to csv during the download process
+
+5. For using Multi-process
+
+    Multi-process downloading of a single file is not supported. For multiple files, a multi-process download strategy will be used. If you need to do a multi-process download of a file, consider splitting the file manually into several copies.
 
 ### Dependency
 
