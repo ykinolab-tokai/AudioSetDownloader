@@ -1,11 +1,12 @@
 # import pandas as pd
 import csv
 import logging
-import shutil
-from downloader_configs import *
 import os
 import pathlib
+import shutil
 import subprocess
+
+from downloader_configs import *
 
 try:
     import pytube
@@ -14,14 +15,14 @@ except ImportError as imer:
     exit("-1")
 
 
-def convert_to_wav(filename: str, dir: str) -> [str, None]:
+def convert_to_wav(filename: str, save_dir: str) -> [str, None]:
     """
     :param filename:
-    :param dir: save to which folder
+    :param save_dir: save to which folder
     :return: converted file name
     """
     name = os.path.basename(filename)
-    output_name = os.path.join(dir, f"{name}.wav")
+    output_name = os.path.join(save_dir, f"{name}.wav")
     ret = subprocess.run([
         "ffmpeg",
         "-i", filename,
@@ -33,25 +34,26 @@ def convert_to_wav(filename: str, dir: str) -> [str, None]:
         return output_name
 
 
-def splits_audio(filename, from_sec: int, end_sec: int, dir: str, call_back) -> [str, None]:
+def splits_audio(filename, from_sec: int, end_sec: int, save_dir: str, call_back) -> [str, None]:
     """
     After downloading, split audio file.
     :param filename:
     :param from_sec:
     :param end_sec:
     :param call_back:
-    :param dir: save to which folder
+    :param save_dir: save to which folder
     :return: split file name.
     """
     print(filename)
     return filename
 
 
-def download_video(url: str, youtube_id: str, dir:str, highest_quality=False) -> [str, None]:
+def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=False) -> [str, None]:
     """
     download youtube video from url.
     :param url:
     :param highest_quality:
+    :param save_dir:
     :return: the name of downloaded file.
     """
     try:
@@ -66,7 +68,7 @@ def download_video(url: str, youtube_id: str, dir:str, highest_quality=False) ->
             logging.info(f"Downloading <{url}> with default quality.")
             download_file_name = pytube.YouTube(url).streams.first().download()
         _, ext_name = os.path.splitext(download_file_name)
-        moved_name = f"{dir}/{youtube_id}{ext_name}"
+        moved_name = f"{save_dir}/{youtube_id}{ext_name}"
         pathlib.Path(download_file_name).rename(moved_name)
         logging.info(f"File<{moved_name}> youtube id:{youtube_id}, done.\n placed at: {moved_name}")
         return moved_name
@@ -114,7 +116,7 @@ def main():
         logging.info(f"Download timer :{TIMER}")
         for raw in reader:
             url = f"{YTB_URL_FORMAT.format(YTID=(ytid := raw['YTID']))}"
-            moved_name = download_video(url, ytid, dl_video_save_dir,DOWN_HIGHEST_QUALITY)
+            moved_name = download_video(url, ytid, dl_video_save_dir, DOWN_HIGHEST_QUALITY)
             wave_name = None
             split_name = None
             if moved_name is not None:
@@ -125,8 +127,8 @@ def main():
             if wave_name is None:
                 logging.fatal(f"Could not convert file<{wave_name}> to wav format.")
             else:
-                start = 0 #raw["start_seconds"]
-                end = 0 #raw["end_seconds"]
+                start = 0  # raw["start_seconds"]
+                end = 0  # raw["end_seconds"]
                 logging.info(f"Splitting file<{wave_name}>, from {start} to {end}")
                 split_name = splits_audio(wave_name, start, end, splits_dir, None)
 
@@ -135,7 +137,7 @@ def main():
             else:
                 split_audio_positive_label.write(f"{split_name}, {None}\n")
 
-            if TIMER > 0 and i == TIMER:
+            if 0 < TIMER == i:
                 break
             i += 1
     split_audio_positive_label.close()
