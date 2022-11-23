@@ -46,3 +46,11 @@ This program/code in published by MIT License.
 
 * Python version should greater than 3.4(for using `pathlib`)
 * using 3rd party lib `pytube`, install it by `pip install pytube`
+
+### For Bug
+
+* If the downloader cannot download normally, **please consider whether the format of the csv file is legal and whether the first four lines have been removed.**
+
+* YouTube videos are not stable, the links in the database may be invalid. The data that is finally successfully downloaded and its label data will be saved in the split-pos.csv file. Please use this data as a benchmark.
+
+* In addition, the data that failed to download is also recorded in the log file by the logger, please refer to this file.
