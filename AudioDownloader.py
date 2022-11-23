@@ -1,4 +1,3 @@
-# import pandas as pd
 import csv
 import logging
 import os
@@ -90,7 +89,7 @@ def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=Fal
         return None
 
 
-def main(csv_file: str, timer):
+def main(csv_file: str, timer:int, remove_exist: bool):
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s - %(levelname)s - %(message)s - pid:%(process)d",
                         handlers=[
@@ -103,24 +102,27 @@ def main(csv_file: str, timer):
     if not os.path.exists(dl_video_save_dir):
         os.makedirs(dl_video_save_dir)
     else:
-        logging.info("Video save dir already exist. Trying to cleanup.")
-        shutil.rmtree(dl_video_save_dir)
-        logging.info("Cleanup done.")
-        os.makedirs(dl_video_save_dir)
+        if remove_exist:
+            logging.info("Video save dir already exist. Trying to cleanup.")
+            shutil.rmtree(dl_video_save_dir)
+            logging.info("Cleanup done.")
+            os.makedirs(dl_video_save_dir)
     if not os.path.exists(wav_temps_dir):
         os.makedirs(wav_temps_dir)
     else:
-        logging.info("Waves save dir already exist. Trying to cleanup.")
-        shutil.rmtree(wav_temps_dir)
-        logging.info("Cleanup done.")
-        os.makedirs(wav_temps_dir)
+        if remove_exist:
+            logging.info("Waves save dir already exist. Trying to cleanup.")
+            shutil.rmtree(wav_temps_dir)
+            logging.info("Cleanup done.")
+            os.makedirs(wav_temps_dir)
     if not os.path.exists(splits_dir):
         os.makedirs(splits_dir)
     else:
-        logging.info("Splits save dir already exist. Trying to cleanup.")
-        shutil.rmtree(splits_dir)
-        logging.info("Cleanup done.")
-        os.makedirs(splits_dir)
+        if remove_exist:
+            logging.info("Splits save dir already exist. Trying to cleanup.")
+            shutil.rmtree(splits_dir)
+            logging.info("Cleanup done.")
+            os.makedirs(splits_dir)
     logging.info(f"Meta from file: {csv_file}")
     split_audio_positive_label = open(f"{csv_file}.split-pos.csv", "w", buffering=20)
     with open(csv_file, "r") as csv_fin:
@@ -134,6 +136,9 @@ def main(csv_file: str, timer):
                 "end_sec": int(float(line[2].replace(" ", ""))),
                 "positive_labels": line[3:]
             }
+            if os.path.exists(f"./{wav_temps_dir}/{raw['YTID']}.wav"):
+                logging.info(f"./{wav_temps_dir}/{raw['YTID']}.wav exist, download continue.")
+                continue
             url = f"{YTB_URL_FORMAT.format(YTID=(ytid := raw['YTID']))}"
             moved_name = download_video(url, ytid, dl_video_save_dir, DOWN_HIGHEST_QUALITY)
             wave_name = None
@@ -169,7 +174,7 @@ if __name__ == "__main__":
     # for using Multiprocessing:
     pool = multiprocessing.Pool(len(CSV_FILE_NAMES))
     for i in range(len(CSV_FILE_NAMES)):
-        pool.apply_async(main, args=(CSV_FILE_NAMES[i], TIMER))
+        pool.apply_async(main, args=(CSV_FILE_NAMES[i], TIMER, REMOVE_EXIST_DOWNLOADS))
     print("Waiting for all subprocesses done")
     pool.close()
     pool.join()

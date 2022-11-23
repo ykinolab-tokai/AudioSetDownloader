@@ -27,12 +27,13 @@ This program/code in published by MIT License.
 
     This defines the constants needed during the download process.
 
-    |        Symbols         |                            Means                             | Type   |
-    | :--------------------: | :----------------------------------------------------------: | ------ |
-    |    `CSV_FILE_NAMES`    |    The paths of the csv file that needs to be downloaded     | `list` |
-    |    `YTB_URL_FORMAT`    | Youtube link rules, where YTID represents the id of the video | `str`  |
-    |        `TIMER`         | The maximum number of downloaded files. When timer=3, 4 files will be downloaded. | `int`  |
-    | `DOWN_HIGHEST_QUALITY` | Youtube videos have different specifications, whether to download the highest quality specifications. | `bool` |
+    |         Symbols          |                            Means                             | Type   |
+    | :----------------------: | :----------------------------------------------------------: | ------ |
+    |     `CSV_FILE_NAMES`     |    The paths of the csv file that needs to be downloaded     | `list` |
+    |     `YTB_URL_FORMAT`     | Youtube link rules, where YTID represents the id of the video | `str`  |
+    |         `TIMER`          | The maximum number of downloaded files. When timer=3, 4 files will be downloaded. | `int`  |
+    |  `DOWN_HIGHEST_QUALITY`  | Youtube videos have different specifications, whether to download the highest quality specifications. | `bool` |
+    | `REMOVE_EXIST_DOWNLOADS` |          Whether to remove existing download files           | `bool` |
 
 4. Run `AudioDownloader.py`
 
