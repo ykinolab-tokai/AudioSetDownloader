@@ -21,7 +21,7 @@ This program/code in published by MIT License.
 
 2. **REMOVE** the first four lines.
 
-    These csv files have a special format, the first four lines are unnecessary content. Of course, it can be kept in other places as metadata, but when running the script to try to download the audio corresponding to the script, please delete these four lines.
+    These csv files have a special format, the first 3 lines are unnecessary content. Of course, it can be kept in other places as metadata, but when running the script to try to download the audio corresponding to the script, please delete these four lines.
 
 3. Rewrite the contents of `download_configs.py`
 
@@ -50,7 +50,7 @@ This program/code in published by MIT License.
 
 ### For Bug
 
-* If the downloader cannot download normally, **please consider whether the format of the csv file is legal and whether the first four lines have been removed.**
+* If the downloader cannot download normally, **please consider whether the format of the csv file is legal and whether the first 3 lines have been removed.**
 
 * YouTube videos are not stable, the links in the database may be invalid. The data that is finally successfully downloaded and its label data will be saved in the split-pos.csv file. Please use this data as a benchmark.
 
