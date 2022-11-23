@@ -5,7 +5,8 @@ import os
 import pathlib
 import shutil
 import subprocess
-
+import sys
+import multiprocessing
 from downloader_configs import *
 
 try:
@@ -89,7 +90,13 @@ def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=Fal
         return None
 
 
-def main(csv_file: str):
+def main(csv_file: str, timer):
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s - %(levelname)s - %(message)s - pid:%(process)d",
+                        handlers=[
+                            logging.FileHandler(filename=f"{csv_file}_dl.log"),
+                            logging.StreamHandler(stream=sys.stdout)
+                        ])
     dl_video_save_dir = f"./{csv_file}.download/"
     wav_temps_dir = f"./{csv_file}.waves/"
     splits_dir = f"./{csv_file}.splits/"
@@ -114,19 +121,12 @@ def main(csv_file: str):
         shutil.rmtree(splits_dir)
         logging.info("Cleanup done.")
         os.makedirs(splits_dir)
-    logging.basicConfig(level=logging.INFO,
-                        format="%(levelname)s:%(name)s:%(message)s",
-                        handlers=[
-                            logging.FileHandler(f"{csv_file}_dl.log"),
-                            logging.StreamHandler()
-                        ])
     logging.info(f"Meta from file: {csv_file}")
-
-    split_audio_positive_label = open(f"{csv_file}.split-pos.csv", "w")
+    split_audio_positive_label = open(f"{csv_file}.split-pos.csv", "w", buffering=20)
     with open(csv_file, "r") as csv_fin:
         reader = csv.reader(csv_fin)
         i = 0
-        logging.info(f"Download timer :{TIMER}")
+        logging.info(f"Download timer :{timer}")
         for line in reader:
             raw = {
                 "YTID": line[0],
@@ -155,22 +155,24 @@ def main(csv_file: str):
                 logging.fatal(f"Can not split file<{wave_name}> to {start}s to {end}s")
             else:
                 split_audio_positive_label.write(f'''{split_name}, {'{}'.format(",".join(raw["positive_labels"]))}\n''')
+                split_audio_positive_label.flush()
 
-            if 0 < TIMER == i:
+            if 0 < timer == i:
                 break
             i += 1
     split_audio_positive_label.close()
 
 
 if __name__ == "__main__":
+    for csv_file in CSV_FILE_NAMES:
+        assert os.path.exists(csv_file), f"csv file <{csv_file}> did not exist"
     # for using Multiprocessing:
-    import multiprocessing
     pool = multiprocessing.Pool(len(CSV_FILE_NAMES))
     for i in range(len(CSV_FILE_NAMES)):
-        pool.apply_async(main, args=(CSV_FILE_NAMES[i], ))
+        pool.apply_async(main, args=(CSV_FILE_NAMES[i], TIMER))
     print("Waiting for all subprocesses done")
     pool.close()
     pool.join()
     print("All Subprocess done.")
     # Single csv file:
-    # main(csv_file=CSV_FILE_NAMES[0])
+    # main(CSV_FILE_NAMES[0], TIMER)
