@@ -48,6 +48,23 @@ This program/code in published by MIT License.
 * Python version should greater than 3.4(for using `pathlib`)
 * using 3rd party lib `pytube`, install it by `pip install pytube`
 
+### For Async Audio-Set Downloading
+
+The program has been using this flow now data set:
+
+```mermaid
+flowchart LR
+	GetUrl --> vd("Video Downloader")
+	vd --"Downloaded video path"--> AudioConverter
+	AudioConverter --"Converted audio path"--> Splitter
+```
+
+This is actually a very slow strategy, because having to wait until ffmpeg converts the video to audio and then splitting the audio before proceeding to the next download task doesn't qualify as pipelining.
+
+Starting the next task of downloading while waiting for the ffmpeg sub-process to perform the conversion is somewhat more time efficient.
+
+However, the program is currently untested and can be used as pseudo-code, and the user is responsible for all consequences arising from the use of this code.
+
 ### For Bug
 
 * If the downloader cannot download normally, **please consider whether the format of the csv file is legal and whether the first 3 lines have been removed.**
