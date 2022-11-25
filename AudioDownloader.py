@@ -7,15 +7,43 @@ import subprocess
 import sys
 import multiprocessing
 from downloader_configs import *
-
+from typing import Union, Optional
 try:
     import pytube
 except ImportError as imer:
     print("use pip install pytube to install deps.")
     exit("-1")
+'''
+TODO:
+    The pipeline for this program is as follows:
+        1. Download the video from the URL by download() function, it will return the file name of the downloaded video.
+        2. Convert the video to wav file by convert_to_wav() function, it will return the file name of the converted wav file.
+        3. Split the wav file by splits_audio() function, it will return the file name of the split wav file.
+
+    But in this pipline model:
+    Convert function will not run until the download function is finished, 
+    as well as the split function always waiting for convert function, 
+    and the next tern of download will wait for the split function.
+    So the program will be very slow.
+
+    For make this program faster, asynchronism is needed.
+    Next tren of download shall not wait for the split function, 
+    and the split function shall not wait for the convert function.
+
+    The new pipline will be:
+        1. download the first tern of video, put the returns to a queue. start next tern of download, no wait.
+        2. convert the first tern of video, put the returns to a queue, dequeue downloaded video. start next tern of convert, no wait.
+        3. split the first tern of video, put the returns to a queue, dequeue converted video. start next tern of split, no wait.
+
+    The most time-consuming part is the download function, it is important to make it asynchronism.
+    Actually, this can be implemented by multi-processing, using queue to communicate between processes.
+    Currently, I have no idea how to implement this. But Multiprocessing is a implemented for this, now.
 
 
-def convert_to_wav(filename: str, save_dir: str) -> [str, None]:
+'''
+
+
+def convert_to_wav(filename: str, save_dir: str) -> Union[str, None]:
     """
     :param filename:
     :param save_dir: save to which folder
@@ -34,7 +62,7 @@ def convert_to_wav(filename: str, save_dir: str) -> [str, None]:
     return output_name
 
 
-def splits_audio(filename, start_sec: int, end_sec: int, save_dir: str, call_back) -> [str, None]:
+def splits_audio(filename, start_sec: int, end_sec: int, save_dir: str) -> Union[str, None]:
     """
     After downloading, split audio file.
     :param filename:
@@ -61,7 +89,7 @@ def splits_audio(filename, start_sec: int, end_sec: int, save_dir: str, call_bac
     return output_name
 
 
-def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=False) -> [str, None]:
+def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=False) -> Union[str, None]:
     """
     download youtube video from url.
     :param url:
