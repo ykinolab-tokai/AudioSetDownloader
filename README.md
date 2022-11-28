@@ -60,3 +60,13 @@ This program/code in published by MIT License.
 
 #### Change Logs
 
+* Version 1.0.0
+    1. Initial Version, download, convert, split function completed,
+    2. Multi-process feature added.
+
+* Version 1.0.1
+
+    1. Modified the format of logging
+    2. Added experimental features`ONLY_AUDIO`
+
+    

@@ -7,7 +7,8 @@ import subprocess
 import sys
 import multiprocessing
 from downloader_configs import *
-from typing import Union, Optional
+from typing import Union
+
 try:
     import pytube
 except ImportError as imer:
@@ -89,15 +90,21 @@ def splits_audio(filename, start_sec: int, end_sec: int, save_dir: str) -> Union
     return output_name
 
 
-def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=False) -> Union[str, None]:
+def download_video(url: str,
+                   youtube_id: str,
+                   save_dir: str,
+                   highest_quality=False,
+                   only_audio=False) -> Union[str, None]:
     """
-    download youtube video from url.
+    download youtube video from url. move downloaded video to save_dir, return the file path.
     :param url:
     :param highest_quality:
     :param save_dir:
     :return: the name of downloaded file.
     """
     try:
+        if only_audio:
+            download_file_name = pytube.YouTube(url).streams.get_audio_only().desc().first().download()
         if highest_quality:
             logging.info(f"Downloading <{url}> with highest quality.")
             download_file_name = pytube.YouTube(url).streams.filter(progressive=True) \
@@ -117,11 +124,17 @@ def download_video(url: str, youtube_id: str, save_dir: str, highest_quality=Fal
         return None
 
 
-def main(csv_file: str, timer:int, remove_exist: bool):
+def main(csv_file: str,
+         timer: int,
+         remove_exist: bool,
+         youtube_url_fmt: str,
+         only_audio=False,
+         highest_quality=False
+         ) -> None:
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s - %(levelname)s - %(message)s - pid:%(process)d",
                         handlers=[
-                            logging.FileHandler(filename=f"{csv_file}_dl.log"),
+                            logging.FileHandler(filename=f"{csv_file}_dl.log", mode="w"),
                             logging.StreamHandler(stream=sys.stdout)
                         ])
     dl_video_save_dir = f"./{csv_file}.download/"
@@ -167,8 +180,8 @@ def main(csv_file: str, timer:int, remove_exist: bool):
             if os.path.exists(f"./{wav_temps_dir}/{raw['YTID']}.wav"):
                 logging.info(f"./{wav_temps_dir}/{raw['YTID']}.wav exist, download continue.")
                 continue
-            url = f"{YTB_URL_FORMAT.format(YTID=(ytid := raw['YTID']))}"
-            moved_name = download_video(url, ytid, dl_video_save_dir, DOWN_HIGHEST_QUALITY)
+            url = f"{youtube_url_fmt.format(YTID=(ytid := raw['YTID']))}"
+            moved_name = download_video(url, ytid, dl_video_save_dir, highest_quality, only_audio)
             wave_name = None
             split_name = None
             if moved_name is not None:
@@ -177,15 +190,14 @@ def main(csv_file: str, timer:int, remove_exist: bool):
             else:
                 logging.fatal(f"url: <{url}> failed.")
             if wave_name is None:
-                logging.fatal(f"Could not convert file<{wave_name}> to wav format.")
+                logging.fatal(f"Could not convert audio from Video<{raw['YTID']}> to wav format.")
             else:
-                start = raw["start_sec"]
-                end = raw["end_sec"]
-                logging.info(f"Splitting file<{wave_name}>, from {start} to {end}")
-                split_name = splits_audio(wave_name, start, end, splits_dir, None)
+                logging.info(f"Splitting file<{wave_name}>, from {raw['start_sec']} to {raw['end_sec']}")
+                split_name = splits_audio(wave_name, raw['start_sec'], raw['end_sec'], splits_dir)
 
             if split_name is None:
-                logging.fatal(f"Can not split file<{wave_name}> to {start}s to {end}s")
+                logging.fatal(f"Can not split audio from Video<{raw['YTID']}> " +
+                              f"to {raw['start_sec']}s to {raw['end_sec']}s")
             else:
                 split_audio_positive_label.write(f'''{split_name}, {'{}'.format(",".join(raw["positive_labels"]))}\n''')
                 split_audio_positive_label.flush()
@@ -197,15 +209,29 @@ def main(csv_file: str, timer:int, remove_exist: bool):
 
 
 if __name__ == "__main__":
-    for csv_file in CSV_FILE_NAMES:
-        assert os.path.exists(csv_file), f"csv file <{csv_file}> did not exist"
-    # for using Multiprocessing:
-    pool = multiprocessing.Pool(len(CSV_FILE_NAMES))
-    for i in range(len(CSV_FILE_NAMES)):
-        pool.apply_async(main, args=(CSV_FILE_NAMES[i], TIMER, REMOVE_EXIST_DOWNLOADS))
-    print("Waiting for all subprocesses done")
-    pool.close()
-    pool.join()
-    print("All Subprocess done.")
-    # Single csv file:
-    # main(CSV_FILE_NAMES[0], TIMER)
+    if DEBUG:
+        main(csv_file=CSV_FILE_NAMES[0],
+             timer=TIMER,
+             remove_exist=REMOVE_EXIST_DOWNLOADS,
+             youtube_url_fmt=YTB_URL_FORMAT,
+             only_audio=ONLY_AUDIO,
+             highest_quality=DOWN_HIGHEST_QUALITY
+             )
+    else:
+        if ONLY_AUDIO:
+            logging.warning("Only audio mode is enabled. This is a experimental feature. Maybe not work as expected.")
+        for csv_file in CSV_FILE_NAMES:
+            assert os.path.exists(csv_file), f"csv file <{csv_file}> did not exist"
+        # for using Multiprocessing:
+        pool = multiprocessing.Pool(len(CSV_FILE_NAMES))
+        for i in CSV_FILE_NAMES:
+            pool.apply_async(main, args=(i,
+                                         TIMER,
+                                         REMOVE_EXIST_DOWNLOADS,
+                                         YTB_URL_FORMAT,
+                                         ONLY_AUDIO,
+                                         DOWN_HIGHEST_QUALITY))
+        print("Waiting for all subprocesses done")
+        pool.close()
+        pool.join()
+        print("All Subprocess done.")
