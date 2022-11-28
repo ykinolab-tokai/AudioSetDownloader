@@ -30,10 +30,11 @@ This program/code in published by MIT License.
     |         Symbols          |                            Means                             | Type   |
     | :----------------------: | :----------------------------------------------------------: | ------ |
     |     `CSV_FILE_NAMES`     |    The paths of the csv file that needs to be downloaded     | `list` |
-    |     `YTB_URL_FORMAT`     | Youtube link rules, where YTID represents the id of the video | `str`  |
+    |     `YTB_URL_FORMAT`     | YouTube link rules, where YTID represents the id of the video | `str`  |
     |         `TIMER`          | The maximum number of downloaded files. When timer=3, 4 files will be downloaded. | `int`  |
-    |  `DOWN_HIGHEST_QUALITY`  | Youtube videos have different specifications, whether to download the highest quality specifications. | `bool` |
+    |  `DOWN_HIGHEST_QUALITY`  | YouTube videos have different specifications, whether to download the highest quality specifications. | `bool` |
     | `REMOVE_EXIST_DOWNLOADS` |          Whether to remove existing download files           | `bool` |
+    |       `ONLY_AUDIO`       | **Experimental Feature** Whether to only download the audio files. | `bool` |
 
 4. Run `AudioDownloader.py`
 
@@ -51,7 +52,11 @@ This program/code in published by MIT License.
 ### For Bug
 
 * If the downloader cannot download normally, **please consider whether the format of the csv file is legal and whether the first 3 lines have been removed.**
-
 * YouTube videos are not stable, the links in the database may be invalid. The data that is finally successfully downloaded and its label data will be saved in the split-pos.csv file. Please use this data as a benchmark.
-
 * In addition, the data that failed to download is also recorded in the log file by the logger, please refer to this file.
+* If the experimental feature is turned on again, the program may not download properly, so please turn off the experimental feature.
+
+
+
+#### Change Logs
+
