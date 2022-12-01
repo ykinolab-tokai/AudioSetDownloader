@@ -6,14 +6,19 @@ import shutil
 import subprocess
 import sys
 import multiprocessing
-from downloader_configs import *
+try:
+    from downloader_configs import *
+except ImportError:
+    sys.stderr.write("!Panic!: Config file not found.")
+    exit(-1)
 from typing import Union
 
 try:
     import pytube
 except ImportError as imer:
-    print("use pip install pytube to install deps.")
-    exit("-1")
+    print("Trying to install pytube.")
+    subprocess.run([sys.executable, "-m", "pip", "install", "pytube"])
+    import pytube
 '''
 TODO:
     The pipeline for this program is as follows:
