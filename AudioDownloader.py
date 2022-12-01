@@ -19,6 +19,7 @@ except ImportError as imer:
     print("Trying to install pytube.")
     subprocess.run([sys.executable, "-m", "pip", "install", "pytube"])
     import pytube
+VERSION = [1, 0, 1]
 '''
 TODO:
     The pipeline for this program is as follows:
