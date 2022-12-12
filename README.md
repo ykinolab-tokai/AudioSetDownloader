@@ -27,14 +27,16 @@ This program/code in published by MIT License.
 
     This defines the constants needed during the download process.
 
-    |         Symbols          |                            Means                             | Type   |
-    | :----------------------: | :----------------------------------------------------------: | ------ |
-    |     `CSV_FILE_NAMES`     |    The paths of the csv file that needs to be downloaded     | `list` |
-    |     `YTB_URL_FORMAT`     | YouTube link rules, where YTID represents the id of the video | `str`  |
-    |         `TIMER`          | The maximum number of downloaded files. When timer=3, 4 files will be downloaded. | `int`  |
-    |  `DOWN_HIGHEST_QUALITY`  | YouTube videos have different specifications, whether to download the highest quality specifications. | `bool` |
-    | `REMOVE_EXIST_DOWNLOADS` |          Whether to remove existing download files           | `bool` |
-    |       `ONLY_AUDIO`       | **Experimental Feature** Whether to only download the audio files. | `bool` |
+    |          Symbols          |                            Means                             | Type   |
+    | :-----------------------: | :----------------------------------------------------------: | ------ |
+    |     `CSV_FILE_NAMES`      |    The paths of the csv file that needs to be downloaded     | `list` |
+    |     `YTB_URL_FORMAT`      | YouTube link rules, where YTID represents the id of the video | `str`  |
+    |          `TIMER`          | The maximum number of downloaded files. When timer=3, 4 files will be downloaded. | `int`  |
+    |  `DOWN_HIGHEST_QUALITY`   | YouTube videos have different specifications, whether to download the highest quality specifications. | `bool` |
+    | `REMOVE_EXIST_DOWNLOADS`  |          Whether to remove existing download files           | `bool` |
+    |       `ONLY_AUDIO`        | **Experimental Feature** Whether to only download the audio files. | `bool` |
+    | `DELETE_DOWNLOADED_VIDEO` |        Whether to remove download files after splits         | `bool` |
+    |    `DELETE_WAVE_FILE`     |          Whether to remove .wav files after splits           | `bool` |
 
 4. Run `AudioDownloader.py`
 
@@ -69,4 +71,7 @@ This program/code in published by MIT License.
     1. Modified the format of logging
     2. Added experimental features`ONLY_AUDIO`
 
-    
+* Version 1.0.2
+    1. New feature: New configure argument added. Weather remove downloaded video after split or not.
+    2. New feature: New configure argument added. Weather remove .wav files after split or not.
+    3. Type annotations of variables in config file added.

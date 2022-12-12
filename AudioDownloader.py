@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import multiprocessing
+
 try:
     from downloader_configs import *
 except ImportError:
@@ -19,7 +20,7 @@ except ImportError as imer:
     print("Trying to install pytube.")
     subprocess.run([sys.executable, "-m", "pip", "install", "pytube"])
     import pytube
-VERSION = [1, 0, 1]
+VERSION = [1, 0, 2]
 '''
 TODO:
     The pipeline for this program is as follows:
@@ -135,7 +136,9 @@ def main(csv_file: str,
          remove_exist: bool,
          youtube_url_fmt: str,
          only_audio=False,
-         highest_quality=False
+         highest_quality=False,
+         delete_video=False,
+         delete_wav=False,
          ) -> None:
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s - %(levelname)s - %(message)s - pid:%(process)d",
@@ -207,6 +210,13 @@ def main(csv_file: str,
             else:
                 split_audio_positive_label.write(f'''{split_name}, {'{}'.format(",".join(raw["positive_labels"]))}\n''')
                 split_audio_positive_label.flush()
+                if delete_video:
+                    logging.info(f"Deleting video file<{moved_name}>")
+                    os.remove(moved_name)
+                if delete_wav:
+                    logging.info(f"Deleting wave file<{wave_name}>")
+                    logging.info(f"Split file saved at<{split_name}>")
+                    os.remove(wave_name)
 
             if 0 < timer == i:
                 break
@@ -236,7 +246,9 @@ if __name__ == "__main__":
                                          REMOVE_EXIST_DOWNLOADS,
                                          YTB_URL_FORMAT,
                                          ONLY_AUDIO,
-                                         DOWN_HIGHEST_QUALITY))
+                                         DOWN_HIGHEST_QUALITY,
+                                         DELETE_DOWNLOADED_VIDEO,
+                                         DELETE_WAVE_FILE))
         print("Waiting for all subprocesses done")
         pool.close()
         pool.join()
