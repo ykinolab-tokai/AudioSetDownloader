@@ -1,6 +1,10 @@
 # AudioSetDownloader
+### CAUTION:
+THIS PROJECT WAS DEPRECATED, PLEASE USE [THIS PROJECT](https://github.com/LinhMuks-DFox/MuxKit.AudioSet.IO)
 
-This is a python script specifically designed to download this [dataset](https://research.google.com/audioset/).
+
+This is a python script specifically designed to download this 
+[dataset](https://research.google.com/audioset/).
 
 ### Author information:
 
